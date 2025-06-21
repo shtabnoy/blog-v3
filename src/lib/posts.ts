@@ -1,24 +1,55 @@
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
+import { createClient } from '@supabase/supabase-js';
 
-const postsDirectory = path.join(process.cwd(), 'posts');
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-export function getPostSlugs() {
-  return fs.readdirSync(postsDirectory).filter((file) => file.endsWith('.mdx'));
+export async function getAllPosts() {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .order('published_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching posts:', error);
+    return [];
+  }
+
+  return data || [];
 }
 
-export function getPostBySlug(slug: string) {
-  const realSlug = slug.replace(/\.mdx$/, '');
-  const fullPath = path.join(postsDirectory, `${realSlug}.mdx`);
-  const fileContents = fs.readFileSync(fullPath, 'utf8');
-  const { data, content } = matter(fileContents);
-  return { slug: realSlug, meta: data, content };
+export async function getPostBySlug(slug: string) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error) {
+    console.error('Error fetching post:', error);
+    return null;
+  }
+
+  return data;
 }
 
-export function getAllPosts() {
-  const slugs = getPostSlugs();
-  const posts = slugs.map((slug) => getPostBySlug(slug));
-  // Sort by date descending
-  return posts.sort((a, b) => (a.meta.date < b.meta.date ? 1 : -1));
+export async function createPost(post: {
+  slug: string;
+  title: string;
+  description?: string;
+  content: string;
+}) {
+  const { data, error } = await supabase
+    .from('posts')
+    .insert([post])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating post:', error);
+    return null;
+  }
+
+  return data;
 }
