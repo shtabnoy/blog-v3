@@ -6,12 +6,12 @@ export default async function BlogPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Blog</h1>
+      <h1 className="text-3xl font-bold mb-8">Posts</h1>
       <div className="space-y-4">
         {posts.map((post) => (
           <article key={post.id} className="border-b pb-4">
             <Link
-              href={`/blog/${post.slug}`}
+              href={`/posts/${post.slug}`}
               className="block hover:bg-gray-50 p-4 rounded"
             >
               <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
