@@ -72,6 +72,11 @@ npm run dev
 - Once playback is active, use the play/pause, previous, and next buttons
 - The player will show the current track information and album cover
 
+**Option 4: Play Specific Hardcoded Tracks**
+- Click any of the track buttons (Bohemian Rhapsody, Hey Jude, etc.)
+- The selected track will start playing immediately
+- You can easily add more tracks by editing `src/lib/spotify-tracks.ts`
+
 ## Features
 
 - **Playback Controls**: Play/pause, previous, next track

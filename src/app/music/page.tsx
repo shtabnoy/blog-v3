@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { SPOTIFY_TRACKS, TRACK_INFO } from '@/lib/spotify-tracks';
 
 // Import Spotify types
 declare global {
@@ -57,6 +58,38 @@ export default function MusicPage() {
       }
     } catch (error) {
       console.error('❌ Error starting playback:', error);
+    }
+  };
+
+  const playSpecificTrack = async (trackUri?: string) => {
+    if (!deviceId || !token) return;
+
+    try {
+      // Use provided track URI or default to Bohemian Rhapsody
+      const uriToPlay = trackUri || SPOTIFY_TRACKS.bohemianRhapsody;
+
+      const playResponse = await fetch(
+        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            uris: [uriToPlay],
+          }),
+        }
+      );
+
+      if (playResponse.ok) {
+        const trackInfo = TRACK_INFO[uriToPlay];
+        console.log(`✅ Playing: ${trackInfo?.name} by ${trackInfo?.artist}`);
+      } else {
+        console.error('❌ Failed to play specific track');
+      }
+    } catch (error) {
+      console.error('❌ Error playing specific track:', error);
     }
   };
 
@@ -198,9 +231,45 @@ export default function MusicPage() {
             <button className="btn-spotify" onClick={startPlaying}>
               Start Playing
             </button>
+            <div className="track-buttons">
+              <button
+                className="btn-spotify"
+                onClick={() =>
+                  playSpecificTrack(SPOTIFY_TRACKS.bohemianRhapsody)
+                }
+              >
+                Bohemian Rhapsody
+              </button>
+              <button
+                className="btn-spotify"
+                onClick={() => playSpecificTrack(SPOTIFY_TRACKS.heyJude)}
+              >
+                Hey Jude
+              </button>
+              <button
+                className="btn-spotify"
+                onClick={() => playSpecificTrack(SPOTIFY_TRACKS.billieJean)}
+              >
+                Billie Jean
+              </button>
+              <button
+                className="btn-spotify"
+                onClick={() => playSpecificTrack(SPOTIFY_TRACKS.weWillRockYou)}
+              >
+                We Will Rock You
+              </button>
+              <button
+                className="btn-spotify"
+                onClick={() =>
+                  playSpecificTrack(SPOTIFY_TRACKS.dontStopBelievin)
+                }
+              >
+                Don't Stop Believin'
+              </button>
+            </div>
             <p className="help-text">
               Click "Start Playing" to transfer playback from another Spotify
-              app to this web player
+              app to this web player, or choose a specific track to play
             </p>
           </div>
         )}
