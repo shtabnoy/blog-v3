@@ -1,28 +1,50 @@
 import { NextResponse } from 'next/server';
 
-export async function GET() {
-  const spotify_client_id = process.env.SPOTIFY_CLIENT_ID;
+/**
+ * Based on https://developer.spotify.com/documentation/web-playback-sdk/howtos/web-app-player
+ */
 
-  if (!spotify_client_id) {
+const generateRandomString = function (length: number) {
+  let text = '';
+  const possible =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+
+  return text;
+};
+
+export async function GET() {
+  const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
+
+  if (!spotifyClientId) {
     return NextResponse.json(
       { error: 'Spotify client ID not configured' },
       { status: 500 }
     );
   }
 
-  const scope = 'streaming user-read-email user-read-private';
+  const scope =
+    'streaming \
+    user-read-email \
+    user-read-private';
+  const redirectUrl = 'http://localhost:3000/api/auth/callback';
+  const state = generateRandomString(16);
 
-  const auth_query_parameters = new URLSearchParams({
+  const authQueryParams = new URLSearchParams({
     response_type: 'code',
-    client_id: spotify_client_id,
-    scope: scope,
-    redirect_uri: 'http://127.0.0.1:3000/api/auth/callback',
-    state: 'some-state-of-my-choice',
+    client_id: spotifyClientId,
+    scope,
+    redirect_uri: redirectUrl,
+    // state is a randomly generated string to protect against attacks such as cross-site request forgery.
+    // although it's not mandatory, it's highly recommend including one.
+    state,
   });
 
   const authUrl =
-    'https://accounts.spotify.com/authorize/?' +
-    auth_query_parameters.toString();
+    'https://accounts.spotify.com/authorize/?' + authQueryParams.toString();
 
   return NextResponse.redirect(authUrl);
 }

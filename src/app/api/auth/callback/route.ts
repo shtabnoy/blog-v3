@@ -11,16 +11,17 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const spotify_client_id = process.env.SPOTIFY_CLIENT_ID;
-  const spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+  const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
+  const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
-  if (!spotify_client_id || !spotify_client_secret) {
+  if (!spotifyClientId || !spotifyClientSecret) {
     return NextResponse.json(
       { error: 'Spotify credentials not configured' },
       { status: 500 }
     );
   }
 
+  // Exchange authorization code for access token (according to Spotify OAuth 2.0 approach)
   try {
     const tokenResponse = await fetch(
       'https://accounts.spotify.com/api/token',
@@ -29,14 +30,14 @@ export async function GET(request: NextRequest) {
         headers: {
           Authorization:
             'Basic ' +
-            Buffer.from(
-              spotify_client_id + ':' + spotify_client_secret
-            ).toString('base64'),
+            Buffer.from(spotifyClientId + ':' + spotifyClientSecret).toString(
+              'base64'
+            ),
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
           code: code,
-          redirect_uri: 'http://127.0.0.1:3000/api/auth/callback',
+          redirect_uri: 'http://localhost:3000/api/auth/callback',
           grant_type: 'authorization_code',
         }),
       }
@@ -47,14 +48,24 @@ export async function GET(request: NextRequest) {
     }
 
     const tokenData = await tokenResponse.json();
-    const access_token = tokenData.access_token;
+    const accessToken = tokenData.access_token;
 
     // Redirect to the music page with the access token
     return NextResponse.redirect(
-      `http://127.0.0.1:3000/music?access_token=${access_token}`
+      `http://localhost:3000/music?access_token=${accessToken}`
     );
   } catch (error) {
-    console.error('Token exchange error:', error);
+    // Log detailed error information for debugging
+    if (error instanceof Error) {
+      console.error('Token exchange error:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
+    } else {
+      console.error('Token exchange error (unknown type):', error);
+    }
+
     return NextResponse.json(
       { error: 'Failed to authenticate with Spotify' },
       { status: 500 }

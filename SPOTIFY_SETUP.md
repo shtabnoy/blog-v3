@@ -22,7 +22,7 @@ This project includes a Spotify Web Player implementation. Follow these steps to
 
 1. In your app dashboard, note down your **Client ID** and **Client Secret**
 2. Click "Edit Settings"
-3. Add `http://127.0.0.1:3000/api/auth/callback` to the **Redirect URIs**
+3. Add `http://localhost:3000/api/auth/callback` to the **Redirect URIs**
 4. Save the changes
 
 ### 3. Environment Variables
@@ -50,7 +50,7 @@ npm run dev
 
 ### 6. Access the Player
 
-1. Open your browser and go to `http://127.0.0.1:3000/music`
+1. Open your browser and go to `http://localhost:3000/music`
 2. Click "Log in with Spotify"
 3. Authorize the application
 4. You should see the Spotify player interface
