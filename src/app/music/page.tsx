@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { SPOTIFY_TRACKS, TRACK_INFO } from '@/lib/spotify-tracks';
 
 const track = {
@@ -10,14 +10,6 @@ const track = {
     images: [{ url: '' }],
   },
   artists: [{ name: '' }],
-};
-
-type SpotifyPlayer = {
-  connect?: () => Promise<boolean>;
-  disconnect: () => void;
-  previousTrack: () => void;
-  togglePlay: () => void;
-  nextTrack: () => void;
 };
 
 export default function MusicPage() {
