@@ -15,9 +15,10 @@ export async function GET(request: NextRequest) {
   const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
   // Use environment variable for redirect URL, fallback to localhost
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000';
+  const baseUrl =
+    process.env.NODE_ENV === 'production'
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : 'http://localhost:3000';
 
   if (!spotifyClientId || !spotifyClientSecret) {
     return NextResponse.json(

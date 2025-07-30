@@ -32,9 +32,10 @@ export async function GET() {
     user-read-private';
 
   // Use environment variable for redirect URL, fallback to localhost
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000';
+  const baseUrl =
+    process.env.NODE_ENV === 'production'
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : 'http://localhost:3000';
 
   const redirectUrl = `${baseUrl}/api/auth/callback`;
   const state = generateRandomString(16);
