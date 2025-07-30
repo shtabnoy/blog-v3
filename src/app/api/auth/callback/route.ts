@@ -14,6 +14,13 @@ export async function GET(request: NextRequest) {
   const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
   const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
+  // Use environment variable for redirect URL, fallback to localhost
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NODE_ENV === 'production'
+    ? 'https://blog.shtabnoy.com'
+    : 'http://localhost:3000';
+
   if (!spotifyClientId || !spotifyClientSecret) {
     return NextResponse.json(
       { error: 'Spotify credentials not configured' },
@@ -37,8 +44,7 @@ export async function GET(request: NextRequest) {
         },
         body: new URLSearchParams({
           code: code,
-          // extract urls to use on prod
-          redirect_uri: 'http://localhost:3000/api/auth/callback',
+          redirect_uri: `${baseUrl}/api/auth/callback`,
           grant_type: 'authorization_code',
         }),
       }
@@ -52,7 +58,7 @@ export async function GET(request: NextRequest) {
     const accessToken = tokenData.access_token;
 
     // Create response with HTTP-only cookie instead of URL parameter
-    const response = NextResponse.redirect('http://localhost:3000/music');
+    const response = NextResponse.redirect(`${baseUrl}/music`);
 
     // Set access token in HTTP-only cookie (more secure)
     response.cookies.set('spotify_access_token', accessToken, {

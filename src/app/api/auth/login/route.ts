@@ -30,7 +30,15 @@ export async function GET() {
     'streaming \
     user-read-email \
     user-read-private';
-  const redirectUrl = 'http://localhost:3000/api/auth/callback';
+
+  // Use environment variable for redirect URL, fallback to localhost
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NODE_ENV === 'production'
+    ? 'https://blog.shtabnoy.com'
+    : 'http://localhost:3000';
+
+  const redirectUrl = `${baseUrl}/api/auth/callback`;
   const state = generateRandomString(16);
 
   const authQueryParams = new URLSearchParams({
