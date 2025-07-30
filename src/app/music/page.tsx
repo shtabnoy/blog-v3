@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { SPOTIFY_TRACKS, TRACK_INFO } from '@/lib/spotify-tracks';
 
 const track = {
@@ -11,9 +12,17 @@ const track = {
   artists: [{ name: '' }],
 };
 
+type SpotifyPlayer = {
+  connect?: () => Promise<boolean>;
+  disconnect: () => void;
+  previousTrack: () => void;
+  togglePlay: () => void;
+  nextTrack: () => void;
+};
+
 export default function MusicPage() {
   const [token, setToken] = useState<string | null>(null);
-  const [player, setPlayer] = useState<any>(undefined);
+  const [player, setPlayer] = useState<SpotifyPlayer | undefined>(undefined);
   const [is_paused, setPaused] = useState(false);
   const [current_track, setTrack] = useState(track);
   const [deviceId, setDeviceId] = useState<string | null>(null);
@@ -160,7 +169,7 @@ export default function MusicPage() {
         player.disconnect();
       }
     };
-  }, [token]);
+  }, [token, player]);
 
   if (!token) {
     return (
@@ -178,10 +187,12 @@ export default function MusicPage() {
   return (
     <div className="container">
       <div className="main-wrapper">
-        <img
+        <Image
           src={current_track.album.images[0].url}
+          alt="Album cover"
+          width={300}
+          height={300}
           className="now-playing__cover"
-          alt=""
         />
 
         <div className="now-playing__side">
@@ -195,7 +206,7 @@ export default function MusicPage() {
           <button
             className="btn-spotify"
             onClick={() => {
-              player.previousTrack();
+              player?.previousTrack();
             }}
           >
             &lt;&lt;
@@ -203,7 +214,7 @@ export default function MusicPage() {
           <button
             className="btn-spotify"
             onClick={() => {
-              player.togglePlay();
+              player?.togglePlay();
             }}
           >
             {is_paused ? 'PLAY' : 'PAUSE'}
@@ -211,7 +222,7 @@ export default function MusicPage() {
           <button
             className="btn-spotify"
             onClick={() => {
-              player.nextTrack();
+              player?.nextTrack();
             }}
           >
             &gt;&gt;
@@ -256,12 +267,12 @@ export default function MusicPage() {
                   playSpecificTrack(SPOTIFY_TRACKS.dontStopBelievin)
                 }
               >
-                Don't Stop Believin'
+                Don&apos;t Stop Believin&apos;
               </button>
             </div>
             <p className="help-text">
-              Click "Start Playing" to transfer playback from another Spotify
-              app to this web player, or choose a specific track to play
+              Click &quot;Start Playing&quot; to transfer playback from another
+              Spotify app to this web player, or choose a specific track to play
             </p>
           </div>
         )}
