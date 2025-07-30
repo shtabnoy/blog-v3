@@ -34,8 +34,6 @@ export async function GET() {
   // Use environment variable for redirect URL, fallback to localhost
   const baseUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
-    : process.env.NODE_ENV === 'production'
-    ? 'https://blog.shtabnoy.com'
     : 'http://localhost:3000';
 
   const redirectUrl = `${baseUrl}/api/auth/callback`;
