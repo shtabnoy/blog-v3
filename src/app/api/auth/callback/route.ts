@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
         },
         body: new URLSearchParams({
           code: code,
+          // extract urls to use on prod
           redirect_uri: 'http://localhost:3000/api/auth/callback',
           grant_type: 'authorization_code',
         }),
@@ -50,10 +51,19 @@ export async function GET(request: NextRequest) {
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    // Redirect to the music page with the access token
-    return NextResponse.redirect(
-      `http://localhost:3000/music?access_token=${accessToken}`
-    );
+    // Create response with HTTP-only cookie instead of URL parameter
+    const response = NextResponse.redirect('http://localhost:3000/music');
+
+    // Set access token in HTTP-only cookie (more secure)
+    response.cookies.set('spotify_access_token', accessToken, {
+      httpOnly: true, // Not accessible via JavaScript
+      secure: true, // Only sent over HTTPS (in production)
+      sameSite: 'lax', // CSRF protection
+      maxAge: 3600, // 1 hour (matches token expiry)
+      path: '/', // Available across the app
+    });
+
+    return response;
   } catch (error) {
     // Log detailed error information for debugging
     if (error instanceof Error) {

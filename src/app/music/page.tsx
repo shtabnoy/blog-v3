@@ -1,18 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { SPOTIFY_TRACKS, TRACK_INFO } from '@/lib/spotify-tracks';
-
-// Import Spotify types
-declare global {
-  interface Window {
-    onSpotifyWebPlaybackSDKReady: () => void;
-    Spotify: {
-      Player: new (config: any) => any;
-    };
-  }
-}
 
 const track = {
   name: '',
@@ -28,8 +17,6 @@ export default function MusicPage() {
   const [is_paused, setPaused] = useState(false);
   const [current_track, setTrack] = useState(track);
   const [deviceId, setDeviceId] = useState<string | null>(null);
-
-  const searchParams = useSearchParams();
 
   const startPlaying = async () => {
     if (!deviceId || !token) return;
@@ -94,11 +81,22 @@ export default function MusicPage() {
   };
 
   useEffect(() => {
-    const access_token = searchParams.get('access_token');
-    if (access_token) {
-      setToken(access_token);
-    }
-  }, [searchParams]);
+    const getTokenFromCookie = async () => {
+      try {
+        const response = await fetch('/api/auth/token');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.access_token) {
+            setToken(data.access_token);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to get token from cookie:', error);
+      }
+    };
+
+    getTokenFromCookie();
+  }, []);
 
   useEffect(() => {
     if (!token) return;
@@ -123,8 +121,6 @@ export default function MusicPage() {
       player.addListener('ready', ({ device_id }) => {
         console.log('✅ Ready with Device ID', device_id);
         setDeviceId(device_id);
-        // Store device ID for transfer playback
-        localStorage.setItem('spotify_device_id', device_id);
       });
 
       player.addListener('not_ready', ({ device_id }) => {
@@ -154,10 +150,6 @@ export default function MusicPage() {
 
         setTrack(state.track_window.current_track);
         setPaused(state.paused);
-
-        player.getCurrentState().then((state) => {
-          // Player state updated
-        });
       });
 
       player.connect();
