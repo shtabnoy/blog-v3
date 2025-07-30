@@ -169,7 +169,8 @@ export default function MusicPage() {
         player.disconnect();
       }
     };
-  }, [token, player]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   if (!token) {
     return (
@@ -184,16 +185,24 @@ export default function MusicPage() {
     );
   }
 
+  console.log('url: ', current_track.album.images[0].url);
+
   return (
     <div className="container">
       <div className="main-wrapper">
-        <Image
-          src={current_track.album.images[0].url}
-          alt="Album cover"
-          width={300}
-          height={300}
-          className="now-playing__cover"
-        />
+        {current_track.album.images[0].url ? (
+          <Image
+            src={current_track.album.images[0].url}
+            alt="Album cover"
+            width={300}
+            height={300}
+            className="now-playing__cover"
+          />
+        ) : (
+          <div className="now-playing__cover-placeholder">
+            <span>No track playing</span>
+          </div>
+        )}
 
         <div className="now-playing__side">
           <div className="now-playing__name">{current_track.name}</div>
